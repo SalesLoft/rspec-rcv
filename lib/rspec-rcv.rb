@@ -1,5 +1,4 @@
 require "rspec-rcv/version"
-require "rspec-rcv/runner"
 require "rspec-rcv/configuration"
 require "rspec-rcv/test_frameworks/rspec"
 
