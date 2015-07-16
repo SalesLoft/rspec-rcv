@@ -2,6 +2,7 @@ require "rspec-rcv/version"
 require "rspec-rcv/configuration"
 require "rspec-rcv/test_frameworks/rspec"
 
+require "rspec-rcv/handler"
 require "rspec-rcv/data_changed_error"
 
 module RSpecRcv
