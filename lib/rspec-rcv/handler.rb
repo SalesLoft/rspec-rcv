@@ -15,6 +15,7 @@ module RSpecRcv
         end
       end
 
+      FileUtils.mkdir_p(File.dirname(path))
       File.open(path, 'w') do |file|
         output = { recorded_at: Time.now, file: file_path, data: data }
         file.write(output.send(opts[:export_with]))

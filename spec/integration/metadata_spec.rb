@@ -35,6 +35,23 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     end
   end
 
+  describe "writing out to a sub-directory" do
+    it "writes the proper data", rcv: { export_fixture_to: "spec/integration/tmp/deep/test.json" } do
+      def response
+        double('Response', body: 'This is a test')
+      end
+    end
+
+    around(:each) do |ex|
+      ex.run
+      output = JSON.parse(File.read("spec/integration/tmp/deep/test.json"))
+      FileUtils.rm_rf("spec/integration/tmp")
+      expect(output["data"]).to eq("This is a test")
+      expect(Time.parse(output["recorded_at"])).to be_within(5).of(Time.now)
+      expect(output["file"]).to eq("./spec/integration/metadata_spec.rb")
+    end
+  end
+
   describe "with a base path" do
     it "writes to the correct location", rcv: { export_fixture_to: "test.json", base_path: "spec/integration" } do
       def response
