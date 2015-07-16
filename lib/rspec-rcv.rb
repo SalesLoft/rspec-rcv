@@ -19,4 +19,8 @@ module RSpecRcv
   def configuration
     @configuration ||= Configuration.new
   end
+
+  def config(overrides=nil)
+    @configuration.opts(overrides)
+  end
 end

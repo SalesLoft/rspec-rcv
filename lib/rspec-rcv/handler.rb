@@ -2,7 +2,7 @@ module RSpecRcv
   class Handler
     def initialize(file_path, data, metadata: {})
       @file_path = file_path
-      @opts = RSpecRcv.configuration.opts(metadata)
+      @opts = RSpecRcv.config(metadata)
       @data = data.call(@opts)
     end
 
