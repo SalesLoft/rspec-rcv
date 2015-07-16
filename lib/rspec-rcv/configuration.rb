@@ -4,8 +4,8 @@ module RSpecRcv
         exportable_proc: Proc.new { response.body },
         export_with: :to_json,
         fail_on_changed_output: true,
-        export_fixture_to: nil,
-        base_path: nil
+        base_path: nil,
+        export_to: nil
     }
 
     def initialize
@@ -23,7 +23,7 @@ module RSpecRcv
       @opts = DEFAULTS.dup
     end
 
-    def opts(overrides=nil)
+    def opts(overrides={})
       @opts.merge(overrides)
     end
 
@@ -33,14 +33,6 @@ module RSpecRcv
 
     def exportable_proc=(val)
       @opts[:exportable_proc] = val
-    end
-
-    def export_fixture_to
-      @opts[:export_fixture_to]
-    end
-
-    def export_fixture_to=(val)
-      @opts[:export_fixture_to] = val
     end
 
     def export_with
