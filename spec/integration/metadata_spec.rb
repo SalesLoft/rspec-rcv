@@ -3,7 +3,7 @@ require 'integration_helper'
 require 'json'
 require 'yaml'
 
-RSpec.describe "Basic integration RSpec test" do
+RSpec.describe "Integration: Metadata w/ RSpec" do
   let(:prerecorded_time) { Time.now - 60*60 }
 
   def file_fixture(str, file: "test")
