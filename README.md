@@ -53,6 +53,8 @@ a hash will be passed in and the result will be a String written to disk.
 `export_with` by default tries to take hash[:data] (a string) and JSON parse it. If it isn't successful, that is fine and hash[:data] isn't
 changed. If it is JSON, then the pretty print will work more optimally.
 
+Note: This can support things that aren't JSON because you can override Proc's that you need to. However, some of the internal workings assume JSON and so it is recommended to just keep the file as JSON.
+
 # What about fields that change everytime I run the specs?
 
 This is why you can override `compare_with`. For instance, here is a configuration to ignore `id, created_at, updated_at` in a Rails app:
@@ -63,10 +65,18 @@ RSpecRcv.configure do |config|
 
   filters = [:id, :created_at, :updated_at]
   config.compare_with = lambda do |existing, new|
-    existing = JSON.parse(existing)
-    new = JSON.parse(new)
+    existing = ActiveSupport::HashWithIndifferentAccess.new(existing)
+    new = ActiveSupport::HashWithIndifferentAccess.new(JSON.parse(new))
 
     existing.except(*filters) != new.except(*filters)
   end
 end
 ```
+
+# What happens when fields change that shouldn't?
+
+You will get a diff of the output to your console. Here is an example:
+
+![image](https://cloud.githubusercontent.com/assets/1231659/8729785/2a2aaa24-2bbb-11e5-90fe-99572a95ab7f.png)
+
+
