@@ -16,7 +16,7 @@ RSpec.describe RSpecRcv::Configuration do
 
   describe "export_with" do
     it "uses pretty json as the default export_with primarily for JS testing" do
-      h = {a: 1}
+      h = { recorded_at: Time.now, file: "test", data: { a: 1 }.to_json}
       expect(subject.export_with).to be_a(Proc)
       expect(subject.export_with.call(h)).to eq(JSON.pretty_generate(h))
     end

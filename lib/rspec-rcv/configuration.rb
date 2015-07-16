@@ -3,7 +3,13 @@ module RSpecRcv
     DEFAULTS = {
         exportable_proc: Proc.new { response.body },
         compare_with: Proc.new { |existing, new| existing == new },
-        export_with: Proc.new { |hash| JSON.pretty_generate(hash) },
+        export_with: Proc.new do |hash|
+          begin
+            hash[:data] = JSON.parse(hash[:data])
+          rescue JSON::ParserError
+          end
+          JSON.pretty_generate(hash)
+        end,
         fail_on_changed_output: true,
         base_path: nil,
         fixture: nil

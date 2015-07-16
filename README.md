@@ -35,7 +35,13 @@ The following options are available to override, as well as their default values
 ```ruby
 config.exportable_proc = Proc.new { response.body }
 config.compare_with = Proc.new { |existing, new| existing == new }
-config.export_with = Proc.new { |hash| JSON.pretty_generate(hash) }
+config.export_with = Proc.new do |hash|
+                               begin
+                                 hash[:data] = JSON.parse(hash[:data])
+                               rescue JSON::ParserError
+                               end
+                               JSON.pretty_generate(hash)
+                             end
 config.base_path = nil
 config.fail_on_changed_output = true
 ```
@@ -43,6 +49,9 @@ config.fail_on_changed_output = true
 `exportable_proc`, `compare_with`, `export_with` must implement `.call`. For `exportable_proc`, the result will be written to disk
 and should be a String. For `compare_with`, the proc should return true when existing and new are considered equal. For `export_with`
 a hash will be passed in and the result will be a String written to disk.
+
+`export_with` by default tries to take hash[:data] (a string) and JSON parse it. If it isn't successful, that is fine and hash[:data] isn't
+changed. If it is JSON, then the pretty print will work more optimally.
 
 # What about fields that change everytime I run the specs?
 
