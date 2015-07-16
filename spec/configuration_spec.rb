@@ -25,6 +25,18 @@ RSpec.describe RSpecRcv::Configuration do
     end
   end
 
+  describe "compare_with" do
+    it "uses simple compare by default" do
+      expect(subject.compare_with.call(1, 1)).to eq(true)
+      expect(subject.compare_with.call(1, 0)).to eq(false)
+    end
+
+    it "can be set" do
+      subject.compare_with = Proc.new { |e, n| false }
+      expect(subject.compare_with.call(1, 1)).to eq(false)
+    end
+  end
+
   describe "fail_on_changed_output" do
     it "is true for safer changes" do
       expect(subject.fail_on_changed_output).to eq(true)

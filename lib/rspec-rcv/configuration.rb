@@ -2,6 +2,7 @@ module RSpecRcv
   class Configuration
     DEFAULTS = {
         exportable_proc: Proc.new { response.body },
+        compare_with: Proc.new { |existing, new| existing == new },
         export_with: :to_json,
         fail_on_changed_output: true,
         base_path: nil,
@@ -41,6 +42,14 @@ module RSpecRcv
 
     def export_with=(val)
       @opts[:export_with] = val
+    end
+
+    def compare_with
+      @opts[:compare_with]
+    end
+
+    def compare_with=(val)
+      @opts[:compare_with] = val
     end
 
     def base_path
