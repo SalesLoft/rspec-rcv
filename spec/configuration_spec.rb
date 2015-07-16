@@ -15,8 +15,10 @@ RSpec.describe RSpecRcv::Configuration do
   end
 
   describe "export_with" do
-    it "uses to_json as the default export_with primarily for JS testing" do
-      expect(subject.export_with).to eq(:to_json)
+    it "uses pretty json as the default export_with primarily for JS testing" do
+      h = {a: 1}
+      expect(subject.export_with).to be_a(Proc)
+      expect(subject.export_with.call(h)).to eq(JSON.pretty_generate(h))
     end
 
     it "can be set" do
@@ -70,7 +72,7 @@ RSpec.describe RSpecRcv::Configuration do
       subject.reset!
       expect(subject.base_path).to eq(nil)
       expect(subject.fail_on_changed_output).to eq(true)
-      expect(subject.export_with).to eq(:to_json)
+      expect(subject.export_with).to be_a(Proc)
     end
   end
 

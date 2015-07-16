@@ -87,7 +87,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
   end
 
   describe "with a custom export_with" do
-    it "writes the proper data and meta-data", rcv: { fixture: "spec/integration/test.json", export_with: :to_yaml } do
+    it "writes the proper data and meta-data", rcv: { fixture: "spec/integration/test.json", export_with: lambda { |h| h.to_yaml } } do
       def response
         double('Response', body: 'This is a test')
       end
