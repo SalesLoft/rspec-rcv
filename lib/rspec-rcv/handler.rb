@@ -12,11 +12,14 @@ module RSpecRcv
     def call
       return if existing_data && existing_data["file"] == file_path && existing_data["data"] == data
 
+      output = { recorded_at: Time.now, file: file_path, data: data }
+      output = opts[:export_with].call(output) + "\n"
+
       if existing_data
         eq = opts[:compare_with].call(existing_data["data"], data)
 
         if !eq && opts[:fail_on_changed_output]
-          diff = Diffy::Diff.new(existing_data["data"], data)
+          diff = Diffy::Diff.new(existing_file, output)
           raise RSpecRcv::DataChangedError.new("Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false\n\n#{diff}")
         end
 
@@ -25,9 +28,7 @@ module RSpecRcv
 
       FileUtils.mkdir_p(File.dirname(path))
       File.open(path, 'w') do |file|
-        output = { recorded_at: Time.now, file: file_path, data: data }
-        str = opts[:export_with].call(output)
-        file.write("#{str}\n")
+        file.write(output)
       end
     end
 
@@ -43,10 +44,16 @@ module RSpecRcv
       end
     end
 
+    def existing_file
+      @existing_file ||= if File.exists?(path)
+                           File.read(path)
+                         end
+    end
+
     def existing_data
       @existing_data ||= if File.exists?(path)
                            begin
-                             existing_data = JSON.parse(File.read(path))
+                             JSON.parse(File.read(path))
                            rescue JSON::ParserError
                              # The file must not have been valid, so we will overwrite it
                            end
