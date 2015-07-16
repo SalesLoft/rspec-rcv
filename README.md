@@ -6,11 +6,11 @@ This gem currently only applies to the rspec testing framework.
 
 # Usage
 
-The gem is require'd in the rspec loading script, and will take effect from there by using the "export_fixture_to" option. For example, the following test would record response.body to spec/fixtures/widgets/index.json"
+The gem is require'd in the rspec loading script, and will take effect from there by using the "fixture" option. For example, the following test would record response.body to spec/fixtures/widgets/index.json"
 
 ```ruby
 describe "GET index" do
-  it "is successful", export_fixture_to: "widgets/index.json" do
+  it "is successful", fixture: "widgets/index.json" do
     get :index
     expect(response).to be_success
   end

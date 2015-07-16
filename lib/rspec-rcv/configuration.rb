@@ -6,7 +6,7 @@ module RSpecRcv
         export_with: :to_json,
         fail_on_changed_output: true,
         base_path: nil,
-        export_to: nil
+        fixture: nil
     }
 
     def initialize

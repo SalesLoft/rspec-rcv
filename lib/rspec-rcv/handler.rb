@@ -32,9 +32,9 @@ module RSpecRcv
 
     def path
       if opts[:base_path]
-        File.join(opts[:base_path], opts[:export_fixture_to])
+        File.join(opts[:base_path], opts[:fixture])
       else
-        opts[:export_fixture_to]
+        opts[:fixture]
       end
     end
 

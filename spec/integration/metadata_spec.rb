@@ -19,7 +19,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
   }
 
   describe "writing out to disk" do
-    it "writes the proper data and meta-data", rcv: { export_fixture_to: "spec/integration/test.json" } do
+    it "writes the proper data and meta-data", rcv: { fixture: "spec/integration/test.json" } do
       def response
         double('Response', body: 'This is a test')
       end
@@ -36,7 +36,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
   end
 
   describe "writing out to a sub-directory" do
-    it "writes the proper data", rcv: { export_fixture_to: "spec/integration/tmp/deep/test.json" } do
+    it "writes the proper data", rcv: { fixture: "spec/integration/tmp/deep/test.json" } do
       def response
         double('Response', body: 'This is a test')
       end
@@ -53,7 +53,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
   end
 
   describe "with a base path" do
-    it "writes to the correct location", rcv: { export_fixture_to: "test.json", base_path: "spec/integration" } do
+    it "writes to the correct location", rcv: { fixture: "test.json", base_path: "spec/integration" } do
       def response
         double('Response', body: 'This is a test')
       end
@@ -70,7 +70,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
   end
 
   describe "with a custom proc" do
-    it "uses the custom proc to export", rcv: { export_fixture_to: "spec/integration/test.json", exportable_proc: Proc.new{ custom }} do
+    it "uses the custom proc to export", rcv: { fixture: "spec/integration/test.json", exportable_proc: Proc.new{ custom }} do
       def custom
         'This is a test'
       end
@@ -87,7 +87,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
   end
 
   describe "with a custom export_with" do
-    it "writes the proper data and meta-data", rcv: { export_fixture_to: "spec/integration/test.json", export_with: :to_yaml } do
+    it "writes the proper data and meta-data", rcv: { fixture: "spec/integration/test.json", export_with: :to_yaml } do
       def response
         double('Response', body: 'This is a test')
       end
@@ -107,7 +107,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     describe "that has identical data but a different file" do
       let(:fixture) { file_fixture("This is a test") }
 
-      it "doesn't change the existing file", rcv: { export_fixture_to: "spec/integration/test.json" } do
+      it "doesn't change the existing file", rcv: { fixture: "spec/integration/test.json" } do
         def response
           double('Response', body: 'This is a test')
         end
@@ -130,7 +130,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     describe "that has identical data" do
       let(:fixture) { file_fixture("This is a test", file: "./spec/integration/metadata_spec.rb") }
 
-      it "doesn't change the existing file", rcv: { export_fixture_to: "spec/integration/test.json" } do
+      it "doesn't change the existing file", rcv: { fixture: "spec/integration/test.json" } do
         def response
           double('Response', body: 'This is a test')
         end
@@ -150,7 +150,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     describe "that has new contents" do
       let(:fixture) { file_fixture("This is different") }
 
-      it "raises a DataChangedError", rcv: { export_fixture_to: "spec/integration/test.json" } do
+      it "raises a DataChangedError", rcv: { fixture: "spec/integration/test.json" } do
         def response
           double('Response', body: 'This is a test')
         end
@@ -173,7 +173,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     describe "that has new contents but fail_on_changed_output = false" do
       let(:fixture) { file_fixture("This is different") }
 
-      it "updates the file silently", rcv: { export_fixture_to: "spec/integration/test.json", fail_on_changed_output: false } do
+      it "updates the file silently", rcv: { fixture: "spec/integration/test.json", fail_on_changed_output: false } do
         def response
           double('Response', body: 'This is a test')
         end

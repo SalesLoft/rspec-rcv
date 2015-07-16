@@ -7,7 +7,7 @@ end
 
 RSpec.describe "Integration: Configuration w/ RSpec" do
   describe "with a custom proc" do
-    it "uses the custom proc to export", rcv: { export_fixture_to: "spec/integration/test.json" } do
+    it "uses the custom proc to export", rcv: { fixture: "spec/integration/test.json" } do
       def custom
         'This is a test'
       end
