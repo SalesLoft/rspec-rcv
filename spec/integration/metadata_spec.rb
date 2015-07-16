@@ -150,7 +150,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     describe "that has new contents" do
       let(:fixture) { file_fixture("This is different") }
 
-      it "as a stub", rcv: { export_fixture_to: "spec/integration/test.json" } do
+      it "raises a DataChangedError", rcv: { export_fixture_to: "spec/integration/test.json" } do
         def response
           double('Response', body: 'This is a test')
         end
@@ -173,7 +173,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     describe "that has new contents but fail_on_changed_output = false" do
       let(:fixture) { file_fixture("This is different") }
 
-      it "as a stub", rcv: { export_fixture_to: "spec/integration/test.json", fail_on_changed_output: false } do
+      it "updates the file silently", rcv: { export_fixture_to: "spec/integration/test.json", fail_on_changed_output: false } do
         def response
           double('Response', body: 'This is a test')
         end
