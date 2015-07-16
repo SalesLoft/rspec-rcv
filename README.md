@@ -23,7 +23,10 @@ If the file already exists, and the new content is not identical, the test will 
 
 # Lifecycle
 
-The result of the exportable variable is captured at the end of the test, after everything else has run.
+The result of the exportable variable is captured at the end of the test, after everything else has run. Because this is an
+outer `after(:each)`, it will run after all of the other `after` blocks in the suite. This means you can't use the output of
+the file in an after block (not that you should need to). See the spec suite here to understand how you *could* use the output of
+the file in the spec suite.
 
 # Configuration Options
 
