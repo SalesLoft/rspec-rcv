@@ -31,6 +31,7 @@ The following options are available to override, as well as their default values
 
 ```ruby
 config.exportable_proc = lambda { response.body }
+config.export_with = :to_json
 config.base_path = Rails.root + "spec/fixtures"
 config.fail_on_changed_output = true
 ```

@@ -1,3 +1,5 @@
+require 'json'
+
 module RSpecRcv
   module RSpec
     module Metadata
@@ -5,8 +7,9 @@ module RSpecRcv
 
       DEFAULTS = {
           exportable_proc: Proc.new { response.body },
-          export_fixture_to: nil,
+          export_with: :to_json,
           fail_on_changed_output: true,
+          export_fixture_to: nil,
           base_path: nil
       }
 
@@ -25,15 +28,27 @@ module RSpecRcv
 
             data = instance_eval(&opts[:exportable_proc])
 
-            if File.exists?(path) && opts[:fail_on_changed_output]
-              existing_data = File.read(path)
+            existing_data = nil
+            if File.exists?(path)
+              begin
+                existing_data = JSON.parse(File.read(path))
+              rescue JSON::ParserError
+                # The file must not have been valid, so we will overwrite it
+              end
+            end
 
-              if existing_data != data
+            if existing_data && opts[:fail_on_changed_output]
+              if existing_data["data"] != data
                 raise RSpecRcv::DataChangedError.new("Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false")
               end
             end
 
-            File.open(path, 'w') { |file| file.write(data) }
+            unless existing_data && existing_data["file"] == ex.file_path && existing_data["data"] == data
+              File.open(path, 'w') do |file|
+                output = { recorded_at: Time.now, file: ex.file_path, data: data }
+                file.write(output.send(opts[:export_with]))
+              end
+            end
           end
         end
       end
