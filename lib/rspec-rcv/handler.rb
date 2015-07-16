@@ -1,16 +1,8 @@
 module RSpecRcv
   class Handler
-    DEFAULTS = {
-        exportable_proc: Proc.new { response.body },
-        export_with: :to_json,
-        fail_on_changed_output: true,
-        export_fixture_to: nil,
-        base_path: nil
-    }
-
     def initialize(file_path, data, metadata: {})
       @file_path = file_path
-      @opts = DEFAULTS.merge(metadata)
+      @opts = RSpecRcv.configuration.opts(metadata)
       @data = data.call(@opts)
     end
 
