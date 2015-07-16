@@ -31,7 +31,29 @@ The following options are available to override, as well as their default values
 
 ```ruby
 config.exportable_proc = Proc.new { response.body }
+config.compare_with = Proc.new { |existing, new| existing == new }
 config.export_with = :to_json
 config.base_path = nil
 config.fail_on_changed_output = true
+```
+
+`exportable_proc` and `compare_with` must implement `.call`. For `exportable_proc`, the result will be written to disk
+and should be a String. For `compare_with`, the proc should return true when existing and new are considered equal.
+
+# What about fields that change everytime I run the specs?
+
+This is why you can override `compare_with`. For instance, here is a configuration to ignore `id, created_at, updated_at` in a Rails app:
+
+```ruby
+RSpecRcv.configure do |config|
+  config.configure_rspec_metadata!
+
+  filters = [:id, :created_at, :updated_at]
+  config.compare_with = lambda do |existing, new|
+    existing = JSON.parse(existing)
+    new = JSON.parse(new)
+
+    existing.except(*filters) != new.except(*filters)
+  end
+end
 ```
