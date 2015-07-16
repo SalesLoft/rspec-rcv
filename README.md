@@ -30,8 +30,8 @@ The result of the exportable variable is captured at the end of the test, after 
 The following options are available to override, as well as their default values:
 
 ```ruby
-config.exportable_proc = lambda { response.body }
+config.exportable_proc = Proc.new { response.body }
 config.export_with = :to_json
-config.base_path = Rails.root + "spec/fixtures"
+config.base_path = nil
 config.fail_on_changed_output = true
 ```
