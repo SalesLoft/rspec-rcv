@@ -1,5 +1,3 @@
-require 'json'
-
 module RSpecRcv
   module RSpec
     module Metadata

@@ -1,3 +1,6 @@
+require 'json'
+require 'diffy'
+
 module RSpecRcv
   class Handler
     def initialize(file_path, data, metadata: {})
@@ -11,7 +14,8 @@ module RSpecRcv
 
       if existing_data && opts[:fail_on_changed_output]
         if existing_data["data"] != data
-          raise RSpecRcv::DataChangedError.new("Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false")
+          diff = Diffy::Diff.new(existing_data, data)
+          raise RSpecRcv::DataChangedError.new("Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false\n\n#{diff}")
         end
       end
 
