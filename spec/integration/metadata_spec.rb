@@ -119,11 +119,8 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
 
       around(:each) do |ex|
         ex.run
-        output = JSON.parse(File.read("spec/integration/test.json"))
+        expect(File.read("spec/integration/test.json")).to eq(fixture)
         File.delete("spec/integration/test.json")
-        expect(output["data"]).to eq("This is a test")
-        expect(Time.parse(output["recorded_at"])).to be_within(5).of(Time.now)
-        expect(output["file"]).to eq("./spec/integration/metadata_spec.rb")
       end
     end
 
@@ -131,6 +128,26 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
       let(:fixture) { file_fixture("This is a test", file: "./spec/integration/metadata_spec.rb") }
 
       it "doesn't change the existing file", rcv: { fixture: "spec/integration/test.json" } do
+        def response
+          double('Response', body: 'This is a test')
+        end
+      end
+
+      before(:each) {
+        File.open("spec/integration/test.json", 'w') { |file| file.write(fixture) }
+      }
+
+      around(:each) do |ex|
+        ex.run
+        expect(File.read("spec/integration/test.json")).to eq(fixture)
+        File.delete("spec/integration/test.json")
+      end
+    end
+
+    describe "that has different data but compare_with is true" do
+      let(:fixture) { file_fixture("This is different", file: "./spec/integration/metadata_spec.rb") }
+
+      it "doesn't change the existing file", rcv: { fixture: "spec/integration/test.json", compare_with: lambda {|e, n| true } } do
         def response
           double('Response', body: 'This is a test')
         end

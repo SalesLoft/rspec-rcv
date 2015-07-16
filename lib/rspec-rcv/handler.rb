@@ -12,11 +12,15 @@ module RSpecRcv
     def call
       return if existing_data && existing_data["file"] == file_path && existing_data["data"] == data
 
-      if existing_data && opts[:fail_on_changed_output]
-        unless opts[:compare_with].call(existing_data["data"], data)
+      if existing_data
+        eq = opts[:compare_with].call(existing_data["data"], data)
+
+        if !eq && opts[:fail_on_changed_output]
           diff = Diffy::Diff.new(existing_data["data"], data)
           raise RSpecRcv::DataChangedError.new("Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false\n\n#{diff}")
         end
+
+        return if eq
       end
 
       FileUtils.mkdir_p(File.dirname(path))
