@@ -1,4 +1,4 @@
-require 'rspec_rcv'
+require 'rspec-rcv'
 
 RSpecRcv.configure do |config|
   config.configure_rspec_metadata!
