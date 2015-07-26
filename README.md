@@ -64,7 +64,7 @@ the following hashes would not trigger a change with `ignore_keys = [:id]`
 {
   id: "DIFF",
   deep: {
-    id: "DIFF,
+    "id" => "DIFF,
     name: "Steve"
   }
 }
