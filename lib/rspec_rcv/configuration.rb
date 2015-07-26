@@ -1,15 +1,9 @@
 module RSpecRcv
   class Configuration
     DEFAULTS = {
-        exportable_proc: Proc.new { response.body },
+        exportable_proc: Proc.new { JSON.parse(response.body) },
         compare_with: Proc.new { |existing, new| existing == new },
-        export_with: Proc.new do |hash|
-          begin
-            hash[:data] = JSON.parse(hash[:data])
-          rescue JSON::ParserError
-          end
-          JSON.pretty_generate(hash)
-        end,
+        codec: Codecs::PrettyJson.new,
         fail_on_changed_output: true,
         base_path: nil,
         fixture: nil
@@ -42,12 +36,12 @@ module RSpecRcv
       @opts[:exportable_proc] = val
     end
 
-    def export_with
-      @opts[:export_with]
+    def codec
+      @opts[:codec]
     end
 
-    def export_with=(val)
-      @opts[:export_with] = val
+    def codec=(val)
+      @opts[:codec] = val
     end
 
     def compare_with

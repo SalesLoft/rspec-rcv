@@ -14,16 +14,14 @@ RSpec.describe RSpecRcv::Configuration do
     end
   end
 
-  describe "export_with" do
-    it "uses pretty json as the default export_with primarily for JS testing" do
-      h = { recorded_at: Time.now, file: "test", data: { a: 1 }.to_json}
-      expect(subject.export_with).to be_a(Proc)
-      expect(subject.export_with.call(h)).to eq(JSON.pretty_generate(h))
+  describe "codecs" do
+    it "uses pretty json as the default primarily for JS testing" do
+      expect(subject.codec).to be_a(RSpecRcv::Codecs::PrettyJson)
     end
 
     it "can be set" do
-      subject.export_with = :to_yaml
-      expect(subject.export_with).to eq(:to_yaml)
+      subject.codec = "x"
+      expect(subject.codec).to eq("x")
     end
   end
 
@@ -65,14 +63,14 @@ RSpec.describe RSpecRcv::Configuration do
     before(:each) {
       subject.base_path = "test"
       subject.fail_on_changed_output = false
-      subject.export_with = :to_yaml
+      subject.codec = "test"
     }
 
     it "resets the settings to the defaults" do
       subject.reset!
       expect(subject.base_path).to eq(nil)
       expect(subject.fail_on_changed_output).to eq(true)
-      expect(subject.export_with).to be_a(Proc)
+      expect(subject.codec).to be_a(RSpecRcv::Codecs::PrettyJson)
     end
   end
 

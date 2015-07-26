@@ -1,4 +1,3 @@
-require 'json'
 require 'diffy'
 
 module RSpecRcv
@@ -13,7 +12,7 @@ module RSpecRcv
       return if existing_data && existing_data["file"] == file_path && existing_data["data"] == data
 
       output = { recorded_at: Time.now, file: file_path, data: data }
-      output = opts[:export_with].call(output) + "\n"
+      output = opts[:codec].export_with(output) + "\n"
 
       if existing_data
         eq = opts[:compare_with].call(existing_data["data"], data)
@@ -52,11 +51,7 @@ module RSpecRcv
 
     def existing_data
       @existing_data ||= if File.exists?(path)
-                           begin
-                             JSON.parse(File.read(path))
-                           rescue JSON::ParserError
-                             # The file must not have been valid, so we will overwrite it
-                           end
+                           opts[:codec].decode_with(File.read(path))
                          end
     end
   end
