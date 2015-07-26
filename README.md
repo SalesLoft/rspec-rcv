@@ -30,34 +30,50 @@ the file in the spec suite.
 
 # Configuration Options
 
-The following options are available to override, as well as their default values:
+The following options are available to override, as well as important default values:
 
 ```ruby
 config.exportable_proc = Proc.new { response.body }
-config.compare_with = Proc.new { |existing, new| existing == new }
-config.export_with = Proc.new do |hash|
-                               begin
-                                 hash[:data] = JSON.parse(hash[:data])
-                               rescue JSON::ParserError
-                               end
-                               JSON.pretty_generate(hash)
-                             end
+config.compare_with # Deep ignoring comparison by default
+config.codec = Codecs::PrettyJson.new
+config.ignore_keys = []
 config.base_path = nil
 config.fail_on_changed_output = true
 ```
 
-`exportable_proc`, `compare_with`, `export_with` must implement `.call`. For `exportable_proc`, the result will be written to disk
-and should be a String. For `compare_with`, the proc should return true when existing and new are considered equal. For `export_with`
-a hash will be passed in and the result will be a String written to disk.
+`exportable_proc`, `compare_with` must implement `.call`. For `exportable_proc`, the result will be written to disk
+and should be a String. For `compare_with`, the proc should return true when existing and new are considered equal.
 
-`export_with` by default tries to take hash[:data] (a string) and JSON parse it. If it isn't successful, that is fine and hash[:data] isn't
-changed. If it is JSON, then the pretty print will work more optimally.
-
-Note: This can support things that aren't JSON because you can override Proc's that you need to. However, some of the internal workings assume JSON and so it is recommended to just keep the file as JSON.
+`codec` must implement `export_with(hash)` and `decode_with(str)`. There is a PrettyJson and Yaml codec included in this gem,
+and PrettyJson is the default as it can be directly consumed by javascript.
 
 # What about fields that change everytime I run the specs?
 
-This is why you can override `compare_with`. For instance, here is a configuration to ignore `id, created_at, updated_at` in a Rails app:
+There is an option called `ignore_keys` which will deep ignore keys that you don't want to cause spec change. For instance,
+the following hashes would not trigger a change with `ignore_keys = [:id]`
+
+```
+{
+  id: 1,
+  deep: {
+    id: 2,
+    name: "Steve"
+  }
+}
+
+{
+  id: "DIFF",
+  deep: {
+    id: "DIFF,
+    name: "Steve"
+  }
+}
+```
+
+but if the name changed from "Steve", then a change would be triggered.
+
+If you want more configuration, you can override `compare_with`. For instance, here is a configuration to shallowly ignore 
+`id, created_at, updated_at` in a Rails app:
 
 ```ruby
 RSpecRcv.configure do |config|

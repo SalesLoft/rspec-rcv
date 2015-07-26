@@ -147,7 +147,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     describe "that has different data but compare_with is true" do
       let(:fixture) { file_fixture({a: 2}, file: "./spec/integration/metadata_spec.rb") }
 
-      it "doesn't change the existing file", rcv: { fixture: "spec/integration/test.json", compare_with: lambda {|e, n| true } } do
+      it "doesn't change the existing file", rcv: { fixture: "spec/integration/test.json", compare_with: lambda {|e, n, opts| true } } do
         def response
           double('Response', body: {a: 1}.to_json)
         end
@@ -165,7 +165,7 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     end
 
     describe "that has new contents" do
-      let(:fixture) { file_fixture({a: 2}) }
+      let(:fixture) { file_fixture({a: 1, deep: { a: 2, b: 3 }}) }
 
       it "raises a DataChangedError", rcv: { fixture: "spec/integration/test.json" } do
         def response
@@ -182,6 +182,26 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
         expect(ex.exception).to be_a(RSpecRcv::DataChangedError)
         ex.example.display_exception = nil
 
+        expect(File.read("spec/integration/test.json")).to eq(fixture)
+        File.delete("spec/integration/test.json")
+      end
+    end
+
+    describe "that has new contents in ignored keys" do
+      let(:fixture) { file_fixture({a: 1, deep: { a: 2, b: 3 }}) }
+
+      it "doesn't change the existing file", rcv: { fixture: "spec/integration/test.json", ignore_keys: [:a] } do
+        def response
+          double('Response', body: {a: 1, deep: { a: 3, b: 3 }}.to_json)
+        end
+      end
+
+      before(:each) {
+        File.open("spec/integration/test.json", 'w') { |file| file.write(fixture) }
+      }
+
+      around(:each) do |ex|
+        ex.run
         expect(File.read("spec/integration/test.json")).to eq(fixture)
         File.delete("spec/integration/test.json")
       end

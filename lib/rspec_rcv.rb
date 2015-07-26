@@ -2,6 +2,7 @@ require "rspec_rcv/version"
 
 require "rspec_rcv/codecs/pretty_json"
 require "rspec_rcv/codecs/yaml"
+require "rspec_rcv/helpers/deep_except"
 
 require "rspec_rcv/configuration"
 require "rspec_rcv/test_frameworks/rspec"

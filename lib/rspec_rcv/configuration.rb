@@ -2,8 +2,11 @@ module RSpecRcv
   class Configuration
     DEFAULTS = {
         exportable_proc: Proc.new { JSON.parse(response.body) },
-        compare_with: Proc.new { |existing, new| existing == new },
+        compare_with: Proc.new do |existing, new, opts|
+          Helpers::DeepExcept.new(existing, opts[:ignore_keys]).to_h == Helpers::DeepExcept.new(new, opts[:ignore_keys]).to_h
+        end,
         codec: Codecs::PrettyJson.new,
+        ignore_keys: [],
         fail_on_changed_output: true,
         base_path: nil,
         fixture: nil
@@ -42,6 +45,14 @@ module RSpecRcv
 
     def codec=(val)
       @opts[:codec] = val
+    end
+
+    def ignore_keys
+      @opts[:ignore_keys]
+    end
+
+    def ignore_keys=(val)
+      @opts[:ignore_keys] = val
     end
 
     def compare_with

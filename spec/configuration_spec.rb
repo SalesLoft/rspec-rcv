@@ -25,10 +25,30 @@ RSpec.describe RSpecRcv::Configuration do
     end
   end
 
+  describe "ignore_keys" do
+    it "is an empty array" do
+      expect(subject.ignore_keys).to eq([])
+    end
+
+    it "can be set" do
+      subject.ignore_keys = [:test]
+      expect(subject.ignore_keys).to eq([:test])
+    end
+  end
+
   describe "compare_with" do
-    it "uses simple compare by default" do
-      expect(subject.compare_with.call(1, 1)).to eq(true)
-      expect(subject.compare_with.call(1, 0)).to eq(false)
+    it "ignores keys at the root level" do
+      expect(subject.compare_with.call({a: 1}, {a: 2}, { ignore_keys: [] })).to eq(false)
+      expect(subject.compare_with.call({a: 1}, {a: 2}, { ignore_keys: [:a] })).to eq(true)
+    end
+
+    it "doesn't ignore different keys" do
+      expect(subject.compare_with.call({a: 1}, {a: 2}, { ignore_keys: [:b] })).to eq(false)
+    end
+
+    it "deep ignores the keys" do
+      expect(subject.compare_with.call({deep: {a: 1}}, {deep: {a: 2}}, { ignore_keys: [] })).to eq(false)
+      expect(subject.compare_with.call({deep: {a: 1}}, {deep: {a: 2}}, { ignore_keys: [:a] })).to eq(true)
     end
 
     it "can be set" do
@@ -64,6 +84,7 @@ RSpec.describe RSpecRcv::Configuration do
       subject.base_path = "test"
       subject.fail_on_changed_output = false
       subject.codec = "test"
+      subject.ignore_keys = [:test]
     }
 
     it "resets the settings to the defaults" do
@@ -71,6 +92,7 @@ RSpec.describe RSpecRcv::Configuration do
       expect(subject.base_path).to eq(nil)
       expect(subject.fail_on_changed_output).to eq(true)
       expect(subject.codec).to be_a(RSpecRcv::Codecs::PrettyJson)
+      expect(subject.ignore_keys).to eq([])
     end
   end
 

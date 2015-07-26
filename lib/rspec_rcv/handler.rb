@@ -15,7 +15,7 @@ module RSpecRcv
       output = opts[:codec].export_with(output) + "\n"
 
       if existing_data
-        eq = opts[:compare_with].call(existing_data["data"], data)
+        eq = opts[:compare_with].call(existing_data["data"], data, opts)
 
         if !eq && opts[:fail_on_changed_output]
           diff = Diffy::Diff.new(existing_file, output)
