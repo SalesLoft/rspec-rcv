@@ -33,7 +33,7 @@ the file in the spec suite.
 The following options are available to override, as well as important default values:
 
 ```ruby
-config.exportable_proc = Proc.new { response.body }
+config.exportable_proc = Proc.new { JSON.parse(response.body) }
 config.compare_with # Deep ignoring comparison by default
 config.codec = Codecs::PrettyJson.new
 config.ignore_keys = []
@@ -43,6 +43,8 @@ config.fail_on_changed_output = true
 
 `exportable_proc`, `compare_with` must implement `.call`. For `exportable_proc`, the result will be written to disk
 and should be a String. For `compare_with`, the proc should return true when existing and new are considered equal.
+
+`exportable_proc` assumes JSON response by default, but could be override to allow for other types of responses.
 
 `codec` must implement `export_with(hash)` and `decode_with(str)`. There is a PrettyJson and Yaml codec included in this gem,
 and PrettyJson is the default as it can be directly consumed by javascript.
