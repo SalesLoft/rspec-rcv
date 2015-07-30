@@ -188,11 +188,54 @@ RSpec.describe "Integration: Metadata w/ RSpec" do
     end
 
     describe "that has new contents in ignored keys" do
-      let(:fixture) { file_fixture({a: 1, deep: { a: 2, b: 3 }}) }
+      let(:fixture) { file_fixture({a: 1, deep: { a: 2, b: 1, c: [1,2] }}) }
 
-      it "doesn't change the existing file", rcv: { fixture: "spec/integration/test.json", ignore_keys: [:a] } do
+      it "doesn't change the existing file", rcv: { fixture: "spec/integration/test.json", ignore_keys: [:a, :c] } do
         def response
-          double('Response', body: {a: 1, deep: { a: 3, b: 3 }}.to_json)
+          double('Response', body: {a: 1, deep: { a: 3, b: 1, c: [1,3] }}.to_json)
+        end
+      end
+
+      before(:each) {
+        File.open("spec/integration/test.json", 'w') { |file| file.write(fixture) }
+      }
+
+      around(:each) do |ex|
+        ex.run
+        expect(File.read("spec/integration/test.json")).to eq(fixture)
+        File.delete("spec/integration/test.json")
+      end
+    end
+
+    describe "that has new contents in deep object array" do
+      let(:fixture) { file_fixture({ deep: { c: [{ key: "new" }] }}) }
+
+      it "raises an error because this is a change", rcv: { fixture: "spec/integration/test.json", ignore_keys: [] } do
+        def response
+          double('Response', body: { deep: { c: [{ key: "v" }] }}.to_json)
+        end
+      end
+
+      before(:each) {
+        File.open("spec/integration/test.json", 'w') { |file| file.write(fixture) }
+      }
+
+      around(:each) do |ex|
+        ex.run
+        expect(ex.exception).to be_a(RSpecRcv::DataChangedError)
+        ex.example.display_exception = nil
+
+        expect(File.read("spec/integration/test.json")).to eq(fixture)
+        File.delete("spec/integration/test.json")
+      end
+    end
+
+    describe "that has new contents in deep object array with ignored key" do
+      let(:fixture) { file_fixture({ deep: { c: [{ key: "new", same: { k: "v" } }] }}) }
+
+      it "doesn't change the file", rcv: { fixture: "spec/integration/test.json", ignore_keys: [:key] } do
+        def response
+          double('Response', body: { deep: { c: [{ key: "v", same: { k: "v" } }] }}.to_json)
         end
       end
 
