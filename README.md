@@ -10,7 +10,7 @@ The gem is require'd in the rspec loading script, and will take effect from ther
 
 ```ruby
 describe "GET index" do
-  it "is successful", fixture: "widgets/index.json" do
+  it "is successful", rcv: {fixture: "spec/fixtures/widgets/index.json"} do
     get :index
     expect(response).to be_success
   end
