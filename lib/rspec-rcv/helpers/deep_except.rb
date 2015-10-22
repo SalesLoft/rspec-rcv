@@ -13,6 +13,12 @@ module RSpecRcv
       private
 
       def inject(hash, except)
+        if hash.is_a?(Array)
+          hash.each_with_index do |item, index|
+            hash[index] = inject(item, except)
+          end
+        end
+
         return hash unless hash.is_a?(Hash)
 
         hash.inject({}) do |h, (k, v)|
