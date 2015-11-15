@@ -9,7 +9,7 @@ module RSpecRcv
     end
 
     def call
-      return if existing_data && existing_data["file"] == file_path && existing_data["data"] == data
+      return :no_change if existing_data && existing_data["file"] == file_path && existing_data["data"] == data
 
       output = { recorded_at: Time.now, file: file_path, data: data }
       output = opts[:codec].export_with(output) + "\n"
@@ -22,13 +22,15 @@ module RSpecRcv
           raise RSpecRcv::DataChangedError.new("Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false\n\n#{diff}")
         end
 
-        return if eq
+        return :same if eq
       end
 
       FileUtils.mkdir_p(File.dirname(path))
       File.open(path, 'w') do |file|
         file.write(output)
       end
+
+      return :to_disk
     end
 
     private
