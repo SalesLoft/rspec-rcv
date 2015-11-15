@@ -63,6 +63,7 @@ module RSpecRcv
       diff.to_s.each_line do |line|
         key = line.split("\"")[1]
         next if opts.fetch(:ignore_keys, []).include?(key)
+        next if key.nil?
 
         if line.start_with?("-")
           removed << key
@@ -76,8 +77,8 @@ Existing data will be overwritten. Turn off this feature with fail_on_changed_ou
 
 #{diff}
 
-The following keys were added: #{added}
-The following keys were removed: #{removed}
+The following keys were added: #{added.uniq}
+The following keys were removed: #{removed.uniq}
       EOF
     end
   end

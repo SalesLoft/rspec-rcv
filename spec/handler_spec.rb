@@ -56,6 +56,19 @@ RSpec.describe RSpecRcv::Handler do
         end
       end
 
+      context "with duplicated keys" do
+        let!(:other_data) { Proc.new { { "duplicated" => "value", "nested" => { "duplicated" => true } } }}
+
+        it "only includes the key once" do
+          expect {
+            subject.call
+          }.to raise_error do |error|
+            expect(error.message).to include("The following keys were added: [\"key\"]")
+            expect(error.message).to include("The following keys were removed: [\"duplicated\", \"nested\"]")
+          end
+        end
+      end
+
       context "with ignored keys" do
         let!(:metadata) { { fixture: file_path, ignore_keys: ["key", "ignored"] } }
         let!(:other_data) { Proc.new { { "other" => "value", "ignored" => "value" } }}
