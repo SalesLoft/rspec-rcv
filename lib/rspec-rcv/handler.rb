@@ -9,7 +9,7 @@ module RSpecRcv
     end
 
     def call
-      return if existing_data && existing_data["file"] == file_path && existing_data["data"] == data
+      return :no_change if existing_data && existing_data["file"] == file_path && existing_data["data"] == data
 
       output = { recorded_at: Time.now, file: file_path, data: data }
       output = opts[:codec].export_with(output) + "\n"
@@ -18,17 +18,18 @@ module RSpecRcv
         eq = opts[:compare_with].call(existing_data["data"], data, opts)
 
         if !eq && opts[:fail_on_changed_output]
-          diff = Diffy::Diff.new(existing_file, output)
-          raise RSpecRcv::DataChangedError.new("Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false\n\n#{diff}")
+          raise_error!(output)
         end
 
-        return if eq
+        return :same if eq
       end
 
       FileUtils.mkdir_p(File.dirname(path))
       File.open(path, 'w') do |file|
         file.write(output)
       end
+
+      return :to_disk
     end
 
     private
@@ -53,6 +54,32 @@ module RSpecRcv
       @existing_data ||= if File.exists?(path)
                            opts[:codec].decode_with(File.read(path))
                          end
+    end
+
+    def raise_error!(output)
+      diff = Diffy::Diff.new(existing_file, output)
+      removed = []
+      added = []
+      diff.to_s.each_line do |line|
+        key = line.split("\"")[1]
+        next if opts.fetch(:ignore_keys, []).include?(key)
+        next if key.nil?
+
+        if line.start_with?("-")
+          removed << key
+        elsif line.start_with?("+")
+          added << key
+        end
+      end
+
+      raise RSpecRcv::DataChangedError.new(<<-EOF)
+Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false
+
+#{diff}
+
+The following keys were added: #{added.uniq}
+The following keys were removed: #{removed.uniq}
+      EOF
     end
   end
 end
