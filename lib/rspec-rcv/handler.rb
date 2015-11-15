@@ -62,6 +62,7 @@ module RSpecRcv
       added = []
       diff.to_s.each_line do |line|
         key = line.split("\"")[1]
+        next if opts.fetch(:ignore_keys, []).include?(key)
 
         if line.start_with?("-")
           removed << key

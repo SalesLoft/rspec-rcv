@@ -56,6 +56,20 @@ RSpec.describe RSpecRcv::Handler do
         end
       end
 
+      context "with ignored keys" do
+        let!(:metadata) { { fixture: file_path, ignore_keys: ["key", "ignored"] } }
+        let!(:other_data) { Proc.new { { "other" => "value", "ignored" => "value" } }}
+
+        it "doesn't output ignored keys" do
+          expect {
+            subject.call
+          }.to raise_error do |error|
+            expect(error.message).to include("The following keys were added: []")
+            expect(error.message).to include("The following keys were removed: [\"other\"]")
+          end
+        end
+      end
+
       context "when fail_on_changed_output=false" do
         let!(:metadata) { { fixture: file_path, fail_on_changed_output: false } }
 
