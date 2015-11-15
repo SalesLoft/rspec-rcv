@@ -47,6 +47,15 @@ RSpec.describe RSpecRcv::Handler do
         }.to raise_error(RSpecRcv::DataChangedError)
       end
 
+      it "outputs the list of keys which changed" do
+        expect {
+          subject.call
+        }.to raise_error do |error|
+          expect(error.message).to include("The following keys were added: [\"key\"]")
+          expect(error.message).to include("The following keys were removed: [\"other\"]")
+        end
+      end
+
       context "when fail_on_changed_output=false" do
         let!(:metadata) { { fixture: file_path, fail_on_changed_output: false } }
 
