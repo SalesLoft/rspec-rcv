@@ -57,10 +57,13 @@ module RSpecRcv
     end
 
     def raise_error!(output)
-      diff = Diffy::Diff.new(existing_file, output)
+      diff = Diffy::Diff.new(existing_file, output).to_s
+      data_index = diff.lines.find_index{ |line| line =~ /"data":/ } # keys before data are un-important
+
       removed = []
       added = []
-      diff.to_s.each_line do |line|
+
+      diff.lines[data_index..-1].each do |line|
         key = line.split("\"")[1]
         next if key.nil?
         next if opts.fetch(:ignore_keys, []).include?(key.to_s)
