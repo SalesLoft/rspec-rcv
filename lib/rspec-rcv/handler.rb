@@ -18,8 +18,7 @@ module RSpecRcv
         eq = opts[:compare_with].call(existing_data["data"], data, opts)
 
         if !eq && opts[:fail_on_changed_output]
-          diff = Diffy::Diff.new(existing_file, output)
-          raise RSpecRcv::DataChangedError.new("Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false\n\n#{diff}")
+          raise_error!(output)
         end
 
         return :same if eq
@@ -55,6 +54,30 @@ module RSpecRcv
       @existing_data ||= if File.exists?(path)
                            opts[:codec].decode_with(File.read(path))
                          end
+    end
+
+    def raise_error!(output)
+      diff = Diffy::Diff.new(existing_file, output)
+      removed = []
+      added = []
+      diff.to_s.each_line do |line|
+        key = line.split("\"")[1]
+
+        if line.start_with?("-")
+          removed << key
+        elsif line.start_with?("+")
+          added << key
+        end
+      end
+
+      raise RSpecRcv::DataChangedError.new(<<-EOF)
+Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false
+
+#{diff}
+
+The following keys were added: #{added}
+The following keys were removed: #{removed}
+      EOF
     end
   end
 end
