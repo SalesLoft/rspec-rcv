@@ -83,6 +83,7 @@ Existing data will be overwritten. Turn off this feature with fail_on_changed_ou
 
 The following keys were added: #{added.uniq}
 The following keys were removed: #{removed.uniq}
+This fixture is located at #{path}
       EOF
     end
   end
