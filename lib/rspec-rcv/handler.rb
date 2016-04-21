@@ -64,7 +64,8 @@ module RSpecRcv
       added = []
 
       diff.lines[data_index..-1].each do |line|
-        key = line.split("\"")[1]
+        match = line.match(/"(.*)":/)
+        key = match[1] if match
         next if key.nil?
         next if opts.fetch(:ignore_keys, []).include?(key.to_s)
         next if opts.fetch(:ignore_keys, []).include?(key.to_sym)
