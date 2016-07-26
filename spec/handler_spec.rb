@@ -27,9 +27,9 @@ RSpec.describe RSpecRcv::Handler do
   end
 
   context "with an existing file" do
-    let!(:other_data) { Proc.new { { "key" => "value" } }}
+    let!(:existing_data) { Proc.new { { "key" => "value" } }}
     before(:each) {
-      RSpecRcv::Handler.new("spec/handler_spec.rb", other_data, metadata: metadata).call
+      RSpecRcv::Handler.new("spec/handler_spec.rb", existing_data, metadata: metadata).call
     }
 
     context "that has the same data" do
@@ -38,8 +38,64 @@ RSpec.describe RSpecRcv::Handler do
       end
     end
 
+    context "with an array of changed values" do
+      let!(:data) { Proc.new { { "ids" => [2] } } }
+      let!(:existing_data) { Proc.new { { ids: [1] } }}
+
+      it "raises RSpecRcv::DataChangedError" do
+        expect {
+          subject.call
+        }.to raise_error(RSpecRcv::DataChangedError)
+      end
+
+      it "outputs the list of keys which changed" do
+        expect {
+          subject.call
+        }.to raise_error do |error|
+          expect(error.message).to include('The following keys were updated: ["ids", "ids.0"]')
+        end
+      end
+    end
+
+    context "with a deep hash of changed values" do
+      let!(:data) { Proc.new { {
+        "ids" => {
+          "a" => 1,
+          "b" => {
+            "c" => {
+              "d" => 2
+            }
+          }
+        }
+      } } }
+      let!(:existing_data) { Proc.new { {
+        "ids" => {
+          "a" => 2,
+          "b" => {
+            "d" => 2
+          }
+        }
+      } } }
+
+      it "raises RSpecRcv::DataChangedError" do
+        expect {
+          subject.call
+        }.to raise_error(RSpecRcv::DataChangedError)
+      end
+
+      it "outputs the list of keys which changed" do
+        expect {
+          subject.call
+        }.to raise_error do |error|
+          expect(error.message).to include('The following keys were updated: ["ids", "ids.a", "ids.b"]')
+          expect(error.message).to include('The following keys were added: ["ids.b.c"]')
+          expect(error.message).to include('The following keys were removed: ["ids.b.d"]')
+        end
+      end
+    end
+
     context "that has different data" do
-      let!(:other_data) { Proc.new { { "other" => "value" } }}
+      let!(:existing_data) { Proc.new { { "other" => "value" } }}
 
       it "raises RSpecRcv::DataChangedError" do
         expect {
@@ -57,7 +113,7 @@ RSpec.describe RSpecRcv::Handler do
       end
 
       context "with duplicated keys" do
-        let!(:other_data) { Proc.new { { "duplicated" => "value", "nested" => { "duplicated" => true } } }}
+        let!(:existing_data) { Proc.new { { "duplicated" => "value", "nested" => { "duplicated" => true } } }}
 
         it "only includes the key once" do
           expect {
@@ -71,7 +127,7 @@ RSpec.describe RSpecRcv::Handler do
 
       context "with ignored keys" do
         let!(:metadata) { { fixture: file_path, ignore_keys: ["key", "ignored"] } }
-        let!(:other_data) { Proc.new { { "other" => "value", "ignored" => "value" } }}
+        let!(:existing_data) { Proc.new { { "other" => "value", "ignored" => "value" } }}
 
         it "doesn't output ignored keys" do
           expect {
