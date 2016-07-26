@@ -59,7 +59,6 @@ module RSpecRcv
 
     def raise_error!(output, json_compare_output)
       diff = Diffy::Diff.new(existing_file, output).to_s
-      data_index = diff.lines.find_index{ |line| line =~ /"data":/ } # keys before data are un-important
 
       removed = json_compare_output.fetch(:remove, {}).keys
       added = json_compare_output.fetch(:append, {}).keys
@@ -70,9 +69,9 @@ Existing data will be overwritten. Turn off this feature with fail_on_changed_ou
 
 #{diff}
 
-The following keys were added: #{added.uniq}
-The following keys were removed: #{removed.uniq}
-The following keys were updated: #{updated.uniq}
+The following keys were added: #{added.uniq.map(&:to_s)}
+The following keys were removed: #{removed.uniq.map(&:to_s)}
+The following keys were updated: #{updated.uniq.map(&:to_s)}
 
 This fixture is located at #{path}
       EOF
