@@ -1,5 +1,4 @@
 require 'diffy'
-require 'json-compare'
 
 module RSpecRcv
   class Handler
@@ -19,7 +18,7 @@ module RSpecRcv
         eq = opts[:compare_with].call(existing_data["data"], data, opts)
 
         if !eq && opts[:fail_on_changed_output]
-          raise_error!(output, JsonCompare.get_diff(existing_data["data"], data, opts.fetch(:ignore_keys, [])))
+          raise_error!(output)
         end
 
         return :same if eq
@@ -57,13 +56,25 @@ module RSpecRcv
                          end
     end
 
-    def raise_error!(output, json_compare_output)
+    def raise_error!(output)
       diff = Diffy::Diff.new(existing_file, output).to_s
       data_index = diff.lines.find_index{ |line| line =~ /"data":/ } # keys before data are un-important
 
-      removed = json_compare_output.fetch(:remove, {}).keys
-      added = json_compare_output.fetch(:append, {}).keys
-      updated = json_compare_output.fetch(:update, {}).keys
+      removed = []
+      added = []
+
+      diff.lines[data_index..-1].each do |line|
+        key = line.split("\"")[1]
+        next if key.nil?
+        next if opts.fetch(:ignore_keys, []).include?(key.to_s)
+        next if opts.fetch(:ignore_keys, []).include?(key.to_sym)
+
+        if line.start_with?("-")
+          removed << key
+        elsif line.start_with?("+")
+          added << key
+        end
+      end
 
       raise RSpecRcv::DataChangedError.new(<<-EOF)
 Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false
@@ -72,8 +83,6 @@ Existing data will be overwritten. Turn off this feature with fail_on_changed_ou
 
 The following keys were added: #{added.uniq}
 The following keys were removed: #{removed.uniq}
-The following keys were updated: #{updated.uniq}
-
 This fixture is located at #{path}
       EOF
     end
