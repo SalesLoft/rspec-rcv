@@ -52,7 +52,7 @@ RSpec.describe RSpecRcv::Handler do
         expect {
           subject.call
         }.to raise_error do |error|
-          expect(error.message).to include("The following keys were updated: [\"ids\"]")
+          expect(error.message).to include('The following keys were updated: ["ids", "ids.0"]')
         end
       end
     end
@@ -87,9 +87,9 @@ RSpec.describe RSpecRcv::Handler do
         expect {
           subject.call
         }.to raise_error do |error|
-          expect(error.message).to include("The following keys were added: [\"d\"]")
-          expect(error.message).to include("The following keys were removed: [\"c\"]")
-          expect(error.message).to include("The following keys were updated: [\"a\"]")
+          expect(error.message).to include('The following keys were updated: ["ids", "ids.a", "ids.b"]')
+          expect(error.message).to include('The following keys were added: ["ids.b.c"]')
+          expect(error.message).to include('The following keys were removed: ["ids.b.d"]')
         end
       end
     end

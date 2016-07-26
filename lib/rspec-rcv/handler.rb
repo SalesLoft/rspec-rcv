@@ -60,9 +60,10 @@ module RSpecRcv
     def raise_error!(output, json_compare_output)
       diff = Diffy::Diff.new(existing_file, output).to_s
 
-      removed = json_compare_output.fetch(:remove, {}).keys
-      added = json_compare_output.fetch(:append, {}).keys
-      updated = json_compare_output.fetch(:update, {}).keys
+      combined = JsonOutputCombiner.new(json_compare_output).combine
+      removed = combined[:remove]
+      added = combined[:append]
+      updated = combined[:update]
 
       raise RSpecRcv::DataChangedError.new(<<-EOF)
 Existing data will be overwritten. Turn off this feature with fail_on_changed_output=false
@@ -75,6 +76,78 @@ The following keys were updated: #{updated.uniq.map(&:to_s)}
 
 This fixture is located at #{path}
       EOF
+    end
+  end
+end
+
+class JsonOutputCombiner
+  def initialize(output)
+    @output = output
+  end
+
+  def combine
+    compact_compare_output(@output, key: "")
+  end
+
+  private
+
+  KEYS_TO_COMBINE = [:update, :append, :remove]
+
+  def combine_results(a, b)
+    KEYS_TO_COMBINE.each do |key|
+      a[key] += b[key]
+    end
+  end
+
+  def compact_compare_output(output, key:)
+    result = { update: [], append: [], remove: [] }
+    return result unless output.is_a?(Hash)
+
+    KEYS_TO_COMBINE.each do |combine_key|
+      output.fetch(combine_key, {}).each do |update_key, nested_output|
+        new_key = "#{key}#{key.empty? ? '' : '.'}#{update_key}"
+        result[combine_key] << new_key
+        nested_result = compact_compare_output(nested_output, key: new_key)
+        combine_results(result, nested_result)
+      end
+    end
+
+    result
+  end
+
+  class JsonOutputCombiner
+    def initialize(output)
+      @output = output
+    end
+
+    def combine
+      compact_compare_output(@output, key: "")
+    end
+
+    private
+
+    KEYS_TO_COMBINE = [:update, :append, :remove]
+
+    def combine_results(a, b)
+      KEYS_TO_COMBINE.each do |key|
+        a[key] += b[key]
+      end
+    end
+
+    def compact_compare_output(output, key:)
+      result = { update: [], append: [], remove: [] }
+      return result unless output.is_a?(Hash)
+
+      KEYS_TO_COMBINE.each do |combine_key|
+        output.fetch(combine_key, {}).each do |update_key, nested_output|
+          new_key = "#{key}#{key.empty? ? '' : '.'}#{update_key}"
+          result[combine_key] << new_key
+          nested_result = compact_compare_output(nested_output, key: new_key)
+          combine_results(result, nested_result)
+        end
+      end
+
+      result
     end
   end
 end
