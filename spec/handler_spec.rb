@@ -38,6 +38,25 @@ RSpec.describe RSpecRcv::Handler do
       end
     end
 
+    context "with an array of changed values" do
+      let!(:data) { Proc.new { { "ids" => [2] } } }
+      let!(:other_data) { Proc.new { { ids: [1] } }}
+
+      it "raises RSpecRcv::DataChangedError" do
+        expect {
+          subject.call
+        }.to raise_error(RSpecRcv::DataChangedError)
+      end
+
+      it "outputs the list of keys which changed" do
+        expect {
+          subject.call
+        }.to raise_error do |error|
+          expect(error.message).to include("The following keys were updated: [\"ids\"]")
+        end
+      end
+    end
+
     context "that has different data" do
       let!(:other_data) { Proc.new { { "other" => "value" } }}
 
