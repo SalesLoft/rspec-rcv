@@ -16,7 +16,7 @@ module RSpecRcv
       output = opts[:codec].export_with(output) + "\n"
 
       if existing_data
-        existing_data_comparison = opts[:parse_existing].call(existing_data)
+        existing_data_comparison = opts.fetch(:parse_existing).call(existing_data)
         eq = opts[:compare_with].call(existing_data_comparison, data, opts)
 
         if !eq && opts[:fail_on_changed_output]
