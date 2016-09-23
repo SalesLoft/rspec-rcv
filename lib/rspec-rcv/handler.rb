@@ -16,10 +16,11 @@ module RSpecRcv
       output = opts[:codec].export_with(output) + "\n"
 
       if existing_data
-        eq = opts[:compare_with].call(existing_data["data"], data, opts)
+        existing_data_comparison = opts[:parse_existing].call(existing_data)
+        eq = opts[:compare_with].call(existing_data_comparison, data, opts)
 
         if !eq && opts[:fail_on_changed_output]
-          raise_error!(output, JsonCompare.get_diff(existing_data["data"], data, opts.fetch(:ignore_keys, [])))
+          raise_error!(output, JsonCompare.get_diff(existing_data_comparison, data, opts.fetch(:ignore_keys, [])))
         end
 
         return :same if eq

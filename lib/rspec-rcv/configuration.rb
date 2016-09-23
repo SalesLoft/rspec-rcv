@@ -9,7 +9,10 @@ module RSpecRcv
         ignore_keys: [],
         fail_on_changed_output: true,
         base_path: nil,
-        fixture: nil
+        fixture: nil,
+        parse_existing: Proc.new do |existing|
+          existing["data"]
+        end
     }
 
     def initialize
