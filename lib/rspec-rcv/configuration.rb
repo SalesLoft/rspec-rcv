@@ -81,5 +81,13 @@ module RSpecRcv
     def fail_on_changed_output=(val)
       @opts[:fail_on_changed_output] = val
     end
+
+    def parse_existing
+      @opts[:parse_existing]
+    end
+
+    def parse_existing=(val)
+      @opts[:parse_existing] = val
+    end
   end
 end
