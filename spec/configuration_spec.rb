@@ -79,6 +79,19 @@ RSpec.describe RSpecRcv::Configuration do
     end
   end
 
+  describe "parse_existing" do
+    it "defaults to using existing data" do
+      expect(subject.parse_existing.call({"data" => {"a" => 1}})).to eq({"a" => 1})
+    end
+
+    it "can be set" do
+      subject.parse_existing = Proc.new do |existing|
+        existing
+      end
+      expect(subject.parse_existing.call({"data" => {"a" => 1}})).to eq({"data" => {"a" => 1}})
+    end
+  end
+
   describe ".reset!" do
     before(:each) {
       subject.base_path = "test"
